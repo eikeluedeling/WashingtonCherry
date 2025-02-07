@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+weather/
+cmip6_downloaded/
+data/future_climate/
+data/predictions/frost/
+data/predictions/future_scenarios/
+data/predictions/past_scenarios/
