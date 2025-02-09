@@ -772,56 +772,144 @@ for (cult in cultivars)
 }
 
 
+
 # compute some statistics
 
-cult_past <- past_data[which(past_data$cultivar==cult),]
+for (cult in cultivars)
+  {
+  cult_past <- past_data[which(past_data$cultivar==cult),]
+  
+  past <- cbind(Cultivar = cult,
+                GCM = "none",
+                SSP = "none",
+                aggregate(cult_past["bloom"],
+                          list(cult_past$Scenario), min),
+                aggregate(cult_past["bloom"],
+                          list(cult_past$Scenario), median)[,2],
+                aggregate(cult_past["bloom"],
+                          list(cult_past$Scenario), max)[,2],
+                aggregate(cult_past[c("frostH0","frostH2.2","Tmean","Tmin","Tmax")],
+                          list(cult_past$Scenario), mean)[,2:6],
+                aggregate(cult_past[,c("frostH0","frostH2.2")],
+                          list(cult_past$Scenario), 
+                          function(x) sum(x >= 5))[,2:3],
+                aggregate(cult_past[,c("frostH0","frostH2.2")],
+                          list(cult_past$Scenario),
+                          function(x) sum(x>0))[,2:3])
+  
+  colnames(past)[4:16] <- c("Time","earliest_bloom","median_bloom","latest_bloom",
+                            "mean_frost0","mean_frost2.2",
+                            "mean_Tmean","mean_Tmin","mean_Tmax",
+                            "frost0_5plus","frost2.2_5plus",
+                            "frost0_1plus","frost2.2_1plus")
+  
+  cult_future <- future_data[which(future_data$cultivar==cult),]
+  
+  future <- cbind(Cultivar = cult,
+                  aggregate(cult_future["bloom"],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), min),
+                  aggregate(cult_future["bloom"],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), median)[,4],
+                  aggregate(cult_future["bloom"],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), max)[,4],
+                  aggregate(cult_future[c("frostH0","frostH2.2","Tmean","Tmin","Tmax")],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), mean)[,4:8],
+                  aggregate(cult_future[,c("frostH0","frostH2.2")],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario),
+                            function(x) sum(x >= 5))[,4:5],
+                  aggregate(cult_future[,c("frostH0","frostH2.2")],
+                            list(cult_future$GCM,cult_future$SSP,cult_future$Scenario),
+                            function(x) sum(x>0))[,4:5])
+  
+  colnames(future)<-c("Cultivar","GCM","SSP","Time","earliest_bloom","median_bloom","latest_bloom",
+                      "mean_frost0","mean_frost2.2",
+                      "mean_Tmean","mean_Tmin","mean_Tmax",
+                      "frost0_5plus","frost2.2_5plus",
+                      "frost0_1plus","frost2.2_1plus")                  
+  
+  cult_stats <- rbind(past,future)
+  
+  if(cult == cultivars[1]) all_stats <- cult_stats else
+    all_stats <- rbind(all_stats,cult_stats)
+  
+  write.csv(all_stats, "data/all_frost_results.csv",row.names = FALSE)
 
-past <- cbind(GCM = "none",
-              SSP = "none",
-              aggregate(cult_past["bloom"],
-                        list(cult_past$Scenario), min),
-              aggregate(cult_past["bloom"],
-                        list(cult_past$Scenario), median)[,2],
-              aggregate(cult_past["bloom"],
-                        list(cult_past$Scenario), max)[,2],
-              aggregate(cult_past[c("frostH0","frostH2.2","Tmean","Tmin","Tmax")],
-                list(cult_past$Scenario), mean)[,2:6],
-              aggregate(cult_past[,c("frostH0","frostH2.2")],
-                        list(cult_past$Scenario), 
-                        function(x) sum(x >= 5))[,2:3],
-              aggregate(cult_past[,c("frostH0","frostH2.2")],
-                        list(cult_past$Scenario),
-                        function(x) sum(x>0))[,2:3])
+}
 
-colnames(past)[3:15] <- c("Time","earliest_bloom","median_bloom","latest_bloom",
-                             "mean_frost0","mean_frost2.2",
-                             "mean_Tmean","mean_Tmin","mean_Tmax",
-                             "frost0_5plus","frost0_1plus",
-                             "frost2.2_5plus","frost2.2_1plus")
 
-cult_future <- future_data[which(future_data$cultivar==cult),]
+summa <- data.frame(Metric = c("bloom_past_slope",
+                               "bloom_1960_2020",
+                               "bloom_2020_2050_SSP1",
+                               "bloom_2020_2050_SSP2",
+                               "bloom_2020_2050_SSP3",
+                               "bloom_2020_2050_SSP5",
+                               "bloom_2020_2085_SSP1",
+                               "bloom_2020_2085_SSP2",
+                               "bloom_2020_2085_SSP3",
+                               "bloom_2020_2085_SSP5",
+                               "frost2.2_5Hplus_1960",
+                               "frost2.2_5Hplus_2020",
+                               "frost2.2_5Hplus_2050_SSP1",
+                               "frost2.2_5Hplus_2050_SSP2",
+                               "frost2.2_5Hplus_2050_SSP3",
+                               "frost2.2_5Hplus_2050_SSP5",
+                               "frost2.2_5Hplus_2085_SSP1",
+                               "frost2.2_5Hplus_2085_SSP2",
+                               "frost2.2_5Hplus_2085_SSP3",
+                               "frost2.2_5Hplus_2085_SSP5"))
 
-future <- cbind(aggregate(cult_future["bloom"],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), min),
-                aggregate(cult_future["bloom"],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), median)[,4],
-                aggregate(cult_future["bloom"],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), max)[,4],
-                aggregate(cult_future[c("frostH0","frostH2.2","Tmean","Tmin","Tmax")],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario), mean)[,4:8],
-                aggregate(cult_future[,c("frostH0","frostH2.2")],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario),
-                          function(x) sum(x >= 5))[,4:5],
-                aggregate(cult_future[,c("frostH0","frostH2.2")],
-                          list(cult_future$GCM,cult_future$SSP,cult_future$Scenario),
-                          function(x) sum(x>0))[,4:5])
-colnames(future)<-c("GCM","SSP","Time","earliest_bloom","median_bloom","latest_bloom",
-                    "mean_frost0","mean_frost2.2",
-                    "mean_Tmean","mean_Tmin","mean_Tmax",
-                    "frost0_5plus","frost0_1plus",
-                    "frost2.2_5plus","frost2.2_1plus")                    
 
-all_stats <- rbind(past,future)
+for (cult in cultivars)
+{
+  bloom_medians <- all_stats %>% filter(Cultivar == cult) %>%
+    group_by(Time,SSP) %>% 
+    summarize(mean = mean(median_bloom),.groups = "drop_last")
+  
+  summa[summa$Metric == "bloom_past_slope",cult] <- 
+    (lm(
+      bloom_medians %>% filter(SSP=="none") %>% pluck("mean") ~
+        as.numeric((bloom_medians %>% filter(SSP=="none") %>% pluck("Time"))))$coefficients[2]*10) %>% round(2)
 
-write.csv(all_stats, "data/all_frost_results.csv",row.names = FALSE)
+  summa[summa$Metric == "bloom_1960_2020",cult] <- bloom_medians %>% filter(Time == 2020) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 1960) %>% pluck("mean")
+  
+  summa[summa$Metric == "bloom_2020_2050_SSP1",cult] <- (bloom_medians %>% filter(SSP == "SSP1", Time == 2050) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2050_SSP2",cult] <- (bloom_medians %>% filter(SSP == "SSP2", Time == 2050) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2050_SSP3",cult] <- (bloom_medians %>% filter(SSP == "SSP3", Time == 2050) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2050_SSP5",cult] <- (bloom_medians %>% filter(SSP == "SSP5", Time == 2050) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+
+  summa[summa$Metric == "bloom_2020_2085_SSP1",cult] <- (bloom_medians %>% filter(SSP == "SSP1", Time == 2085) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2085_SSP2",cult] <- (bloom_medians %>% filter(SSP == "SSP2", Time == 2085) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2085_SSP3",cult] <- (bloom_medians %>% filter(SSP == "SSP3", Time == 2085) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  summa[summa$Metric == "bloom_2020_2085_SSP5",cult] <- (bloom_medians %>% filter(SSP == "SSP5", Time == 2085) %>% pluck("mean") -
+    bloom_medians %>% filter(Time == 2020) %>% pluck("mean")) %>% round(2)
+  
+  frost2.2_5Hplus_medians <- all_stats %>% filter(Cultivar == cult) %>%
+    group_by(Time,SSP) %>% 
+    summarize(mean = mean(frost2.2_5plus),.groups = "drop_last")
+  
+  summa[summa$Metric == "frost2.2_5Hplus_1960",cult] <- frost2.2_5Hplus_medians %>% filter(Time == 1960) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2020",cult] <- frost2.2_5Hplus_medians %>% filter(Time == 2020) %>% pluck("mean") %>% round(2)
+
+  summa[summa$Metric == "frost2.2_5Hplus_2050_SSP1",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP1", Time == 2050) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2050_SSP2",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP2", Time == 2050) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2050_SSP3",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP3", Time == 2050) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2050_SSP5",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP5", Time == 2050) %>% pluck("mean") %>% round(2)
+  
+  summa[summa$Metric == "frost2.2_5Hplus_2085_SSP1",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP1", Time == 2085) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2085_SSP2",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP2", Time == 2085) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2085_SSP3",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP3", Time == 2085) %>% pluck("mean") %>% round(2)
+  summa[summa$Metric == "frost2.2_5Hplus_2085_SSP5",cult] <- frost2.2_5Hplus_medians %>% filter(SSP == "SSP5", Time == 2085) %>% pluck("mean") %>% round(2)
+  
+}
+
+write.csv(summa, "data/all_frost_results_summary.csv", row.names = FALSE)
+
 
