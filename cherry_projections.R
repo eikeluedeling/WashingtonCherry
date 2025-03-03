@@ -265,7 +265,7 @@ for(hs in hist_scens)
     mutate(bloom=round(pred))
   select_scen <- hist_scen %>%
     filter(cultivar %in% c("Bing", "Lapins", "Regina", "Schneiders", "Van")) %>%
-    filter(year %in% 3002:3100)
+    filter(year %in% 3001:3100)
   
   weather <- read.csv(paste0("weather/CKA_past_", strsplit(hs,"_")[[1]][5]))
   
@@ -299,7 +299,7 @@ for(fs in futu_scens)
     mutate(bloom=round(pred))
   select_scen <- scen %>%
     filter(cultivar %in% c("Bing", "Lapins", "Regina", "Schneiders", "Van")) %>%
-    filter(year %in% 3002:3100)
+    filter(year %in% 3001:3100)
   
   weather <- read.csv(paste0("data/future_climate/", strsplit(fs,"cka_predictions_")[[1]][2]))
   
@@ -713,10 +713,9 @@ tile_plots <- function(sorted_data, metric, critical_value, colours = rev(blue2y
                          values = c(0,0.1,0.2,0.3,0.6,0.7,0.8,1,1/mx)*mx,"Frost hours",
                          limits = rng) +
     theme_bw() +
-    theme(axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.text.x = element_text(angle=-90, vjust = 0.5, hjust=1))
+    scale_y_continuous(name="Cumulative probability of occurrence", breaks=c(3000,3025,3050,3075,3100),
+                       labels = c("0%", "25%", "50%", "75%", "100%"), limits = c(3000, 3100), expand = c(0,0)) +
+    theme(axis.text.x = element_text(angle=-90, vjust = 0.5, hjust=1))
   
   future_plot_list <- list()
   
@@ -730,6 +729,8 @@ tile_plots <- function(sorted_data, metric, critical_value, colours = rev(blue2y
                            values = c(0,0.1,0.2,0.3,0.6,0.7,0.8,1,1/mx)*mx,"Frost hours",
                            limits = rng) +
       theme_bw() +
+      scale_y_continuous(name="Cumulative probability of occurrence", breaks=c(3000,3025,3050,3075,3100),
+                         labels = c("0%", "25%", "50%", "75%", "100%"), limits = c(3000, 3100), expand = c(0,0)) +
       theme(axis.title.y = element_blank(),
             axis.text.y = element_blank(),
             axis.ticks.y = element_blank(),
@@ -742,13 +743,13 @@ tile_plots <- function(sorted_data, metric, critical_value, colours = rev(blue2y
   plot <- (past_plot +
              future_plot_list +
              plot_layout(guides = "collect",
-                         widths = c(1,rep(1.8,length(future_plot_list))))
+                         widths = c(0.5,rep(2,length(future_plot_list))))
   ) & theme(legend.position = "bottom",
             legend.key.spacing.y = unit(0,"mm"),
             legend.key.height = unit(4,"mm"),
             legend.text = element_text(size=8),
             legend.title = element_text(size=10),
-            axis.title.x = element_blank(),
+            # axis.title.x = element_blank(),
             legend.box.spacing = unit(0,"mm"))
   plot
   
