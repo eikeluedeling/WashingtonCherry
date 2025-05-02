@@ -1,7 +1,7 @@
 library(tidyverse)
 
-devtools::install_github('https://github.com/larscaspersen/eval_phenoflex')
-devtools::install_github('https://github.com/larscaspersen/addition_chillR')
+#devtools::install_github('https://github.com/larscaspersen/eval_phenoflex')
+#devtools::install_github('https://github.com/larscaspersen/addition_chillR')
 library(LarsChill)
 library(evalpheno)
 
@@ -252,7 +252,53 @@ ggsave('plots/pred_obs_cherry_4.jpeg', height = 20, width =25, units = 'cm', dev
 
 
 
+#weighted mean prediction
 
 
+
+
+ypos_text <- 125
+xpos_text <- 60
+cult_select <- c('Bing', 'Lapins', 'Regina', 'Sylvia', 'Van')
+pred_obs %>% 
+  mutate(r_cult = paste(repetition, cultivar)) %>% 
+  filter(r_cult %in% min_rmse_df$r_cult,
+         cultivar %in% cult_select) %>% 
+  ggplot(aes(x = pheno, y = pred)) +
+  geom_abline(intercept = 0, slope = 1, linetype = 'dashed') +
+  geom_text(data = performance_sub[performance_sub$cultivar %in% cult_select,],
+            aes(x = xpos_text, y = ypos_text, label = paste0('Calibration (Validation)\nRMSE: ', 
+                                                             format(rmse_Calibration, digits = 2), 
+                                                             ' (', 
+                                                             format(rmse_Validation, digits = 2),
+                                                             ')\nRPIQ: ', 
+                                                             format(rpiq_Calibration, digits = 2),
+                                                             ' (',
+                                                             format(rpiq_Validation, digits = 2),
+                                                             ')\nMean Bias: ',
+                                                             format(mean_bias_Calibration, digits = 1),
+                                                             ' (',
+                                                             format(mean_bias_Validation, digits = 1),')')),
+            ,hjust = 0) +
+  geom_point(aes(col = split)) +
+  facet_wrap(~cultivar) +
+  scale_color_discrete(name = 'Data Split') +
+  theme_bw(base_size = 15) +
+  ylab('Predicted Bloom Date') +
+  xlab('Observed Bloom Date') +
+  scale_x_continuous(breaks = c(1, 32, 60,91, 121, 152), 
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'), 
+                     limits = c(60, 140)) +
+  scale_y_continuous(breaks = c(1, 32, 60,91, 121, 152), 
+                     labels = c('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'),
+                     limits = c(60, 140)) +
+  theme(legend.position = 'bottom') 
+ggsave('plots/pred_obs_cherry_paper.jpeg', height = 20, width =25, units = 'cm', device = 'jpeg')
+
+
+pred_sub <- pred_obs %>% 
+  mutate(r_cult = paste(repetition, cultivar)) %>% 
+  filter(r_cult %in% min_rmse_df$r_cult,
+         cultivar %in% cult_select) 
 
 
