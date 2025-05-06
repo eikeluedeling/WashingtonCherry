@@ -259,7 +259,7 @@ ggsave('plots/pred_obs_cherry_4.jpeg', height = 20, width =25, units = 'cm', dev
 
 ypos_text <- 125
 xpos_text <- 60
-cult_select <- c('Bing', 'Lapins', 'Regina', 'Sylvia', 'Van')
+cult_select <- c('Bing', 'Lapins', 'Regina', 'Schneiders', 'Van')
 pred_obs %>% 
   mutate(r_cult = paste(repetition, cultivar)) %>% 
   filter(r_cult %in% min_rmse_df$r_cult,
